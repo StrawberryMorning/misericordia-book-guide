@@ -92,31 +92,31 @@ export default function BookCard({
     >
       <div className="p-4 sm:p-5 flex gap-4 flex-1">
         {/* Book Cover or Fallback */}
-        <div className="relative w-20 sm:w-24 h-28 sm:h-36 flex-shrink-0 rounded-lg overflow-hidden shadow-sm bg-gradient-to-br from-amber-700 via-amber-800 to-zinc-900 flex flex-col justify-between p-2">
+        <div className="relative w-20 sm:w-24 h-28 sm:h-36 flex-shrink-0 rounded-xl overflow-hidden shadow-sm bg-zinc-950 border border-zinc-200/50 dark:border-zinc-800 flex items-center justify-center p-1">
           {book.coverUrl ? (
             <img
               src={book.coverUrl}
               alt={book.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
-          ) : null}
-
-          {/* Fallback visual typography */}
-          <div className="relative z-10 flex flex-col justify-between h-full text-white">
-            <span className="text-[9px] uppercase tracking-wider text-amber-200 font-semibold truncate">
-              {book.mediaType === 'manga' ? '⛩️ Mangá' : book.genre || 'Livro'}
-            </span>
-            <div className="my-auto">
-              <BookOpen className="w-5 h-5 text-amber-300/80 mb-1" />
-              <p className="font-serif text-[11px] font-bold line-clamp-2 leading-tight">
-                {book.title}
-              </p>
+          ) : (
+            /* Fallback visual typography */
+            <div className="relative z-10 flex flex-col justify-between h-full w-full bg-gradient-to-br from-amber-700 via-amber-800 to-zinc-900 rounded-lg p-2 text-white">
+              <span className="text-[9px] uppercase tracking-wider text-amber-200 font-semibold truncate">
+                {book.mediaType === 'manga' ? '⛩️ Mangá' : book.genre || 'Livro'}
+              </span>
+              <div className="my-auto">
+                <BookOpen className="w-5 h-5 text-amber-300/80 mb-1" />
+                <p className="font-serif text-[11px] font-bold line-clamp-2 leading-tight">
+                  {book.title}
+                </p>
+              </div>
+              <span className="text-[8px] text-zinc-300 truncate">{book.author}</span>
             </div>
-            <span className="text-[8px] text-zinc-300 truncate">{book.author}</span>
-          </div>
+          )}
         </div>
 
         {/* Book Info */}

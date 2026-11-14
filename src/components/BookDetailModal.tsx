@@ -42,10 +42,10 @@ export default function BookDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden my-8 max-h-[90vh] flex flex-col">
-        {/* Header Banner */}
-        <div className="relative h-36 bg-gradient-to-r from-amber-800 via-amber-900 to-zinc-950 p-6 flex justify-between items-start text-white">
+        {/* Header Bar */}
+        <div className="relative bg-gradient-to-r from-amber-800 via-amber-900 to-zinc-950 px-6 py-4 flex justify-between items-center text-white">
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider font-semibold text-amber-200 px-2.5 py-1 bg-white/10 backdrop-blur-sm rounded-full">
+            <span className="text-xs uppercase tracking-wider font-semibold text-amber-200 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full">
               {book.mediaType === 'manga' ? '⛩️ Mangá • ' : ''}{book.genre}
             </span>
           </div>
@@ -57,16 +57,21 @@ export default function BookDetailModal({
           </button>
         </div>
 
-        {/* Floating Book Cover and Quick Info */}
-        <div className="px-6 pb-6 pt-0 flex-1 overflow-y-auto">
-          <div className="flex flex-col sm:flex-row gap-5 -mt-16 mb-6">
-            {/* Cover */}
-            <div className="w-28 sm:w-32 h-40 sm:h-44 rounded-xl overflow-hidden shadow-xl border-4 border-white dark:border-zinc-900 flex-shrink-0 bg-zinc-800 relative">
+        {/* Modal Content */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          {/* Top Info Row: Cover + Details */}
+          <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+            {/* Book Cover Container - Full Unclipped Artwork */}
+            <div className="w-32 sm:w-36 h-48 sm:h-52 rounded-2xl overflow-hidden shadow-lg border border-zinc-200 dark:border-zinc-800 flex-shrink-0 bg-zinc-950 flex items-center justify-center p-1.5">
               {book.coverUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+                <img
+                  src={book.coverUrl}
+                  alt={book.title}
+                  className="w-full h-full object-contain rounded-xl"
+                />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-amber-700 to-zinc-900 p-3 flex flex-col justify-between text-white">
+                <div className="w-full h-full bg-gradient-to-br from-amber-700 to-zinc-900 p-3 flex flex-col justify-between text-white rounded-xl">
                   <BookOpen className="w-6 h-6 text-amber-300" />
                   <p className="font-serif text-xs font-bold leading-tight">{book.title}</p>
                   <p className="text-[10px] text-zinc-300">{book.author}</p>
@@ -74,14 +79,14 @@ export default function BookDetailModal({
               )}
             </div>
 
-            {/* Title, Author & Quick actions */}
-            <div className="flex-1 sm:pt-16">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+            {/* Title, Author, Rating & Actions */}
+            <div className="flex-1 min-w-0 w-full text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
                     {book.title}
                   </h2>
-                  <p className="text-base text-zinc-600 dark:text-zinc-400 font-medium mt-0.5">
+                  <p className="text-base text-zinc-600 dark:text-zinc-400 font-medium mt-1">
                     {book.author}
                   </p>
                 </div>
@@ -90,7 +95,7 @@ export default function BookDetailModal({
                     onClose();
                     onEdit(book);
                   }}
-                  className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 transition-colors"
+                  className="px-3.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 transition-colors flex-shrink-0"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   Editar
@@ -98,7 +103,7 @@ export default function BookDetailModal({
               </div>
 
               {/* Rating */}
-              <div className="flex items-center gap-1 mt-2.5">
+              <div className="flex items-center justify-center sm:justify-start gap-1 mt-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
@@ -119,7 +124,7 @@ export default function BookDetailModal({
           </div>
 
           {/* Progress Tracker Card */}
-          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800 mb-6">
+          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800">
             <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 mb-2">
               <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                 Progresso: {percent}%
@@ -157,7 +162,7 @@ export default function BookDetailModal({
 
           {/* Quote */}
           {book.favoriteQuote && (
-            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 mb-6 relative">
+            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 relative">
               <Quote className="w-6 h-6 text-amber-500/30 absolute top-3 right-3" />
               <p className="text-xs font-semibold text-amber-800 dark:text-amber-400 mb-1">
                 Frase Marcante:
@@ -170,11 +175,11 @@ export default function BookDetailModal({
 
           {/* Notes */}
           {book.notes ? (
-            <div className="space-y-1.5 mb-4">
+            <div className="space-y-1.5">
               <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                 Minhas Anotações &amp; Resenha
               </h4>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-850/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
                 {book.notes}
               </p>
             </div>

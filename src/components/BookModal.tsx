@@ -267,7 +267,7 @@ export default function BookModal({
                       className="p-2 rounded-lg bg-white dark:bg-zinc-800/80 hover:bg-amber-100 dark:hover:bg-amber-950/50 cursor-pointer flex items-center gap-3 transition-colors text-left"
                     >
                       {res.coverUrl ? (
-                        <img src={res.coverUrl} alt={res.title} className="w-7 h-10 object-cover rounded" />
+                        <img src={res.coverUrl} alt={res.title} className="w-8 h-11 object-contain bg-zinc-950 rounded" />
                       ) : (
                         <div className="w-7 h-10 bg-zinc-200 dark:bg-zinc-700 rounded flex items-center justify-center">
                           <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
@@ -299,7 +299,7 @@ export default function BookModal({
                       className="p-2 rounded-lg bg-white dark:bg-zinc-800/80 hover:bg-amber-100 dark:hover:bg-amber-950/50 cursor-pointer flex items-center gap-3 transition-colors text-left"
                     >
                       {res.coverUrl ? (
-                        <img src={res.coverUrl} alt={res.title} className="w-7 h-10 object-cover rounded" />
+                        <img src={res.coverUrl} alt={res.title} className="w-8 h-11 object-contain bg-zinc-950 rounded" />
                       ) : (
                         <div className="w-7 h-10 bg-zinc-200 dark:bg-zinc-700 rounded flex items-center justify-center">
                           <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
