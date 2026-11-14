@@ -7,13 +7,23 @@ import FilterBar from '@/components/FilterBar';
 import BookCard from '@/components/BookCard';
 import BookModal from '@/components/BookModal';
 import BookDetailModal from '@/components/BookDetailModal';
+import AuthModal from '@/components/AuthModal';
 import { Book, BookStatus, SortOption } from '@/types/book';
-import { getStoredBooks, saveStoredBooks } from '@/lib/storage';
-import { BookOpen, Plus } from 'lucide-react';
+import { saveStoredBooks } from '@/lib/storage';
+import { getSupabaseClient } from '@/lib/supabaseClient';
+import {
+  fetchBooks,
+  syncSaveBook,
+  syncDeleteBook,
+  migrateLocalBooksToCloud,
+} from '@/lib/bookService';
+import { BookOpen, Plus, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Filters & Sorting
   const [selectedStatus, setSelectedStatus] = useState<'all' | BookStatus>('all');
@@ -22,38 +32,82 @@ export default function Home() {
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [modalSearchPreFill, setModalSearchPreFill] = useState('');
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedDetailBook, setSelectedDetailBook] = useState<Book | null>(null);
 
-  // Load from LocalStorage on mount
+  // Load books and auth state on mount
   useEffect(() => {
-    const loaded = getStoredBooks();
-    setBooks(loaded);
-    setIsLoaded(true);
-  }, []);
+    let isMounted = true;
 
-  // Save to LocalStorage whenever books change
-  const handleUpdateBooks = (newBooks: Book[]) => {
-    setBooks(newBooks);
-    saveStoredBooks(newBooks);
-  };
+    async function init() {
+      // 1. Load books (local or cloud if already logged in)
+      const initialBooks = await fetchBooks();
+      if (isMounted) {
+        setBooks(initialBooks);
+        setIsLoaded(true);
+      }
+
+      // 2. Check current Supabase session
+      const client = getSupabaseClient();
+      if (client) {
+        const { data: { user } } = await client.auth.getUser();
+        if (user?.email && isMounted) {
+          setUserEmail(user.email);
+        }
+
+        // 3. Listen to auth changes
+        const { data: { subscription } } = client.auth.onAuthStateChange(
+          async (event, session) => {
+            if (!isMounted) return;
+            if (session?.user?.email) {
+              setUserEmail(session.user.email);
+              if (event === 'SIGNED_IN') {
+                const count = await migrateLocalBooksToCloud();
+                if (count > 0) {
+                  setToastMessage(`${count} livros salvos foram sincronizados na sua conta! 🍓`);
+                  setTimeout(() => setToastMessage(null), 4000);
+                }
+                const cloudBooks = await fetchBooks();
+                setBooks(cloudBooks);
+              }
+            } else if (event === 'SIGNED_OUT') {
+              setUserEmail(null);
+              const localBooks = await fetchBooks();
+              setBooks(localBooks);
+            }
+          }
+        );
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      }
+    }
+
+    init();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Add or Edit book
   const handleSaveBook = (bookData: Partial<Book>) => {
     if (editingBook) {
       // Editing
-      const updated = books.map((b) =>
-        b.id === editingBook.id
-          ? {
-              ...b,
-              ...bookData,
-              updatedAt: new Date().toISOString(),
-            }
-          : b
-      );
-      handleUpdateBooks(updated);
+      const updatedBook: Book = {
+        ...editingBook,
+        ...bookData,
+        updatedAt: new Date().toISOString(),
+      };
+      setBooks((prev) => prev.map((b) => (b.id === editingBook.id ? updatedBook : b)));
+      syncSaveBook(updatedBook);
       setEditingBook(null);
+      if (selectedDetailBook?.id === editingBook.id) {
+        setSelectedDetailBook(updatedBook);
+      }
     } else {
       // Creating new
       const newBook: Book = {
@@ -73,47 +127,77 @@ export default function Home() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      handleUpdateBooks([newBook, ...books]);
+      setBooks((prev) => [newBook, ...prev]);
+      syncSaveBook(newBook);
     }
   };
 
   // Delete book
   const handleDeleteBook = (id: string) => {
-    const updated = books.filter((b) => b.id !== id);
-    handleUpdateBooks(updated);
+    setBooks((prev) => prev.filter((b) => b.id !== id));
+    syncDeleteBook(id);
     if (selectedDetailBook?.id === id) setSelectedDetailBook(null);
   };
 
   // Quick page progress update
   const handleUpdatePages = (id: string, newPage: number) => {
-    const updated = books.map((b) => {
-      if (b.id !== id) return b;
-      const isComplete = newPage >= b.totalPages;
-      return {
-        ...b,
-        currentPage: newPage,
-        status: isComplete ? ('completed' as BookStatus) : b.status === 'want_to_read' ? ('reading' as BookStatus) : b.status,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-    handleUpdateBooks(updated);
+    const target = books.find((b) => b.id === id);
+    if (!target) return;
+
+    const isComplete = newPage >= target.totalPages;
+    const updatedBook: Book = {
+      ...target,
+      currentPage: newPage,
+      status: isComplete
+        ? ('completed' as BookStatus)
+        : target.status === 'want_to_read'
+        ? ('reading' as BookStatus)
+        : target.status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    setBooks((prev) => prev.map((b) => (b.id === id ? updatedBook : b)));
+    syncSaveBook(updatedBook);
 
     if (selectedDetailBook && selectedDetailBook.id === id) {
-      setSelectedDetailBook((prev) =>
-        prev
-          ? {
-              ...prev,
-              currentPage: newPage,
-              status: newPage >= prev.totalPages ? 'completed' : prev.status,
-            }
-          : null
-      );
+      setSelectedDetailBook(updatedBook);
     }
   };
 
   // Import books backup
   const handleImportBooks = (imported: Book[]) => {
-    handleUpdateBooks(imported);
+    setBooks(imported);
+    saveStoredBooks(imported);
+    imported.forEach((b) => syncSaveBook(b));
+  };
+
+  // Sign out
+  const handleSignOut = async () => {
+    const client = getSupabaseClient();
+    if (client) {
+      await client.auth.signOut();
+      setUserEmail(null);
+      setToastMessage('Você saiu da conta. Seus dados continuam no cache deste dispositivo.');
+      setTimeout(() => setToastMessage(null), 3500);
+    }
+  };
+
+  // Auth success callback
+  const handleAuthSuccess = async () => {
+    const client = getSupabaseClient();
+    if (client) {
+      const { data: { user } } = await client.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+        const count = await migrateLocalBooksToCloud();
+        const cloudBooks = await fetchBooks();
+        setBooks(cloudBooks);
+        if (count > 0) {
+          setToastMessage(`${count} obras sincronizadas com sua conta nuvem! ✨`);
+          setTimeout(() => setToastMessage(null), 4000);
+        }
+      }
+    }
   };
 
   // Filtered & Sorted books
@@ -147,7 +231,10 @@ export default function Home() {
           return pB - pA;
         }
         // default: 'recent'
-        return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+        return (
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime()
+        );
       });
   }, [books, selectedStatus, searchQuery, sortBy]);
 
@@ -164,14 +251,25 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-stone-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600 flex-shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <Header
         books={books}
+        userEmail={userEmail}
         onOpenNewModal={() => {
           setEditingBook(null);
           setIsModalOpen(true);
         }}
         onImportBooks={handleImportBooks}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Content Area */}
@@ -314,11 +412,11 @@ export default function Home() {
           {/* Version Tracker Badge (SemVer) */}
           <div className="flex items-center gap-2">
             <div
-              title="Versionamento Semântico: v1.2.0 (Suporte a Mangás & Open Library)"
+              title="Versionamento Semântico: v1.3.0 (Sincronização em Nuvem Supabase + Contas)"
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>v1.2.0</span>
+              <span>v1.3.0</span>
             </div>
           </div>
         </div>
@@ -347,6 +445,13 @@ export default function Home() {
           setIsModalOpen(true);
         }}
         onUpdatePages={handleUpdatePages}
+      />
+
+      {/* Auth / Cloud Sync Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   );

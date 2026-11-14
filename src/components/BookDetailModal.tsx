@@ -179,7 +179,7 @@ export default function BookDetailModal({
               <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                 Minhas Anotações &amp; Resenha
               </h4>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-850/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
                 {book.notes}
               </p>
             </div>
