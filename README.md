@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Misericórdia Books - Registro e Diário de Leitura
 
-## Getting Started
+Uma aplicação web moderna, minimalista e elegante para rastreamento de leitura, acompanhamento de hábitos e registro de citações.
 
-First, run the development server:
+Projetada com foco em experiência do usuário (UX), persistência local imediata e pronta para escalabilidade multiplataforma (Web e Mobile com Flutter).
 
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Vercel](https://img.shields.io/badge/Vercel-Deployment-black?style=for-the-badge&logo=vercel)
+
+---
+
+## ✨ Funcionalidades
+
+- **CRUD Completo de Livros:** Cadastro de título, autor(a), gênero, total de páginas, página atual, nota de 1 a 5 estrelas, frase marcante e anotações/resenhas.
+- **Autopreenchimento Inteligente (Google Books API):** Basta digitar o nome do livro e clicar em "Buscar" para preencher automaticamente título, autor, capa oficial e número de páginas.
+- **Painel de Estatísticas de Leitura:**
+  - Total de livros lidos e em andamento.
+  - Total de páginas consumidas.
+  - Fila de desejos ("Quero Ler").
+  - Média geral de avaliações.
+- **Barra de Progresso Interativa:**
+  - Atualização rápida de páginas (+10 páginas ou "Terminei").
+  - Efeito de celebração com confetes ao concluir a leitura.
+- **Filtros e Busca em Tempo Real:**
+  - Filtro por abas de status (*Lendo*, *Quero Ler*, *Concluídos*, *Abandonados*).
+  - Busca instantânea por título, autor ou gênero.
+  - Ordenação dinâmica por mais recentes, avaliação, progresso em % e páginas.
+- **Backup Seguro (Import / Export JSON):** Seus dados são salvos no `localStorage` do navegador e você pode exportar ou restaurar o arquivo JSON de backup a qualquer momento.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
+- **Linguagem:** [TypeScript](https://www.typescriptlang.org/)
+- **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+- **Ícones:** [Lucide React](https://lucide.dev/)
+- **Efeitos Visuais:** Canvas Confetti
+- **Deploy:** [Vercel](https://vercel.com/)
+
+---
+
+## 🚀 Como Executar Localmente
+
+1. Clone o repositório:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/StrawberryMorning/misericordia_book_guide.git
+cd misericordia_book_guide
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Instale as dependências:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Abra no navegador: [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🗺️ Roadmap de Evolução
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [x] **Fase 1 (MVP Web):** Interface fluida, CRUD local, Google Books API e Vercel Deploy.
+- [ ] **Fase 2 (Backend & Nuvem):** Banco de dados relacional (PostgreSQL via Supabase/Neon) e autenticação de usuários.
+- [ ] **Fase 3 (App Mobile com Flutter):** Criação do aplicativo móvel nativo em Flutter consumindo as mesmas rotas e sincronizando a biblioteca em tempo real.
+- [ ] **Fase 4 (Scanner de Código de Barras):** Leitura de ISBN direto pela câmera do celular.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Desenvolvido com carinho por **StrawberryMorning**.
