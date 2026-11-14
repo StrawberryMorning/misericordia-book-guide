@@ -8,6 +8,7 @@ Projetada com foco em experiência do usuário (UX), persistência local imediat
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
 ![Vercel](https://img.shields.io/badge/Vercel-Deployment-black?style=for-the-badge&logo=vercel)
+[![Live Demo](https://img.shields.io/badge/Demo-Online%20no%20Vercel-success?style=for-the-badge)](https://misericordia-book-guide.vercel.app)
 
 ---
 
