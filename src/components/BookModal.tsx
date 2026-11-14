@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Book, BookStatus } from '@/types/book';
+import { Book, BookStatus, MediaType, UnitType } from '@/types/book';
 import { X, Search, Sparkles, Star, BookOpen, Loader2 } from 'lucide-react';
 import { searchGoogleBooks, GoogleBookSearchResult } from '@/lib/googleBooks';
+import { searchJikanManga, JikanMangaSearchResult } from '@/lib/jikanApi';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -25,14 +26,18 @@ export default function BookModal({
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [status, setStatus] = useState<BookStatus>('want_to_read');
   const [rating, setRating] = useState<number>(0);
+  const [mediaType, setMediaType] = useState<MediaType>('book');
+  const [unitType, setUnitType] = useState<UnitType>('pages');
   const [coverUrl, setCoverUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [favoriteQuote, setFavoriteQuote] = useState('');
 
-  // Google Books search
+  // Auto-search provider: 'books' (Google Books) vs 'manga' (Jikan / MAL)
+  const [searchProvider, setSearchProvider] = useState<'books' | 'manga'>('books');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<GoogleBookSearchResult[]>([]);
+  const [bookResults, setBookResults] = useState<GoogleBookSearchResult[]>([]);
+  const [mangaResults, setMangaResults] = useState<JikanMangaSearchResult[]>([]);
 
   useEffect(() => {
     if (initialData) {
@@ -43,6 +48,8 @@ export default function BookModal({
       setCurrentPage(initialData.currentPage || 0);
       setStatus(initialData.status || 'want_to_read');
       setRating(initialData.rating || 0);
+      setMediaType(initialData.mediaType || 'book');
+      setUnitType(initialData.unitType || (initialData.mediaType === 'manga' ? 'chapters' : 'pages'));
       setCoverUrl(initialData.coverUrl || '');
       setNotes(initialData.notes || '');
       setFavoriteQuote(initialData.favoriteQuote || '');
@@ -54,33 +61,62 @@ export default function BookModal({
       setCurrentPage(0);
       setStatus('want_to_read');
       setRating(0);
+      setMediaType('book');
+      setUnitType('pages');
       setCoverUrl('');
       setNotes('');
       setFavoriteQuote('');
     }
-    setSearchResults([]);
+    setBookResults([]);
+    setMangaResults([]);
     setSearchQuery('');
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSearchGoogle = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     setIsSearching(true);
-    const results = await searchGoogleBooks(searchQuery);
-    setSearchResults(results);
+    setBookResults([]);
+    setMangaResults([]);
+
+    if (searchProvider === 'books') {
+      const results = await searchGoogleBooks(searchQuery);
+      setBookResults(results);
+    } else {
+      const results = await searchJikanManga(searchQuery);
+      setMangaResults(results);
+    }
     setIsSearching(false);
   };
 
   const handleSelectGoogleBook = (result: GoogleBookSearchResult) => {
     setTitle(result.title);
     setAuthor(result.author);
+    setMediaType('book');
+    setUnitType('pages');
     if (result.genre) setGenre(result.genre);
     if (result.totalPages) setTotalPages(result.totalPages);
     if (result.coverUrl) setCoverUrl(result.coverUrl);
     if (result.description && !notes) setNotes(result.description.slice(0, 300) + '...');
-    setSearchResults([]);
+    setBookResults([]);
+  };
+
+  const handleSelectJikanManga = (result: JikanMangaSearchResult) => {
+    setTitle(result.title);
+    setAuthor(result.author);
+    setMediaType('manga');
+    setUnitType('chapters');
+    if (result.genre) setGenre(result.genre);
+    if (result.totalChapters) setTotalPages(result.totalChapters);
+    if (result.coverUrl) setCoverUrl(result.coverUrl);
+    if (result.synopsis && !notes) setNotes(result.synopsis.slice(0, 300) + '...');
+    if (result.score) {
+      // Map 10-point scale to 5-star scale
+      setRating(Math.round(result.score / 2));
+    }
+    setMangaResults([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,11 +129,13 @@ export default function BookModal({
     onSave({
       title: title.trim(),
       author: author.trim(),
-      genre: genre.trim() || 'Geral',
+      genre: genre.trim() || (mediaType === 'manga' ? 'Mangá' : 'Geral'),
       totalPages: Number(totalPages) > 0 ? Number(totalPages) : 100,
       currentPage: Math.min(Number(totalPages), Math.max(0, Number(currentPage))),
       status,
       rating,
+      mediaType,
+      unitType,
       coverUrl: coverUrl.trim(),
       notes: notes.trim(),
       favoriteQuote: favoriteQuote.trim(),
@@ -115,11 +153,11 @@ export default function BookModal({
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-serif text-lg font-bold text-zinc-950 dark:text-zinc-100 font-medium">
-                {initialData ? 'Editar Livro' : 'Adicionar Novo Livro'}
+              <h2 className="font-serif text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                {initialData ? 'Editar Obra' : 'Adicionar Nova Obra'}
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Preencha os dados ou use a busca automática
+                Cadastre livros, mangás ou quadrinhos na sua biblioteca
               </p>
             </div>
           </div>
@@ -133,17 +171,56 @@ export default function BookModal({
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
-          {/* Quick Auto-Complete via Google Books */}
+          {/* Quick Auto-Complete Bar */}
           {!initialData && (
             <div className="p-3.5 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 rounded-2xl">
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900 dark:text-amber-300 mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                Busca Rápida na Google Books (Auto-preenchimento)
-              </label>
-              <form onSubmit={handleSearchGoogle} className="flex gap-2">
+              <div className="flex items-center justify-between mb-2">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900 dark:text-amber-300">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Auto-preenchimento Inteligente
+                </label>
+
+                {/* Source Toggle: Google Books vs Jikan/MAL */}
+                <div className="flex bg-amber-200/60 dark:bg-zinc-800 p-0.5 rounded-lg text-[11px] font-medium">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchProvider('books');
+                      setMangaResults([]);
+                    }}
+                    className={`px-2 py-0.5 rounded-md transition-all ${
+                      searchProvider === 'books'
+                        ? 'bg-white dark:bg-zinc-700 text-amber-900 dark:text-amber-300 shadow-sm font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    📚 Livros
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchProvider('manga');
+                      setBookResults([]);
+                    }}
+                    className={`px-2 py-0.5 rounded-md transition-all ${
+                      searchProvider === 'manga'
+                        ? 'bg-white dark:bg-zinc-700 text-amber-900 dark:text-amber-300 shadow-sm font-semibold'
+                        : 'text-zinc-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    ⛩️ Mangás (Jikan)
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleSearch} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Ex: O Hobbit, Harry Potter, Sapiens..."
+                  placeholder={
+                    searchProvider === 'books'
+                      ? 'Buscar livro (ex: Dom Casmurro, Sapiens...)'
+                      : 'Buscar mangá no MyAnimeList (ex: Berserk, One Piece...)'
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
@@ -158,13 +235,13 @@ export default function BookModal({
                 </button>
               </form>
 
-              {/* Search suggestions */}
-              {searchResults.length > 0 && (
-                <div className="mt-3 space-y-1.5 max-h-40 overflow-y-auto border-t border-amber-200/60 dark:border-amber-900/40 pt-2">
+              {/* Google Books search suggestions */}
+              {bookResults.length > 0 && (
+                <div className="mt-3 space-y-1.5 max-h-44 overflow-y-auto border-t border-amber-200/60 dark:border-amber-900/40 pt-2">
                   <p className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
-                    Selecione para preencher:
+                    Livros encontrados (Google Books):
                   </p>
-                  {searchResults.map((res, idx) => (
+                  {bookResults.map((res, idx) => (
                     <div
                       key={idx}
                       onClick={() => handleSelectGoogleBook(res)}
@@ -182,7 +259,46 @@ export default function BookModal({
                           {res.title}
                         </p>
                         <p className="text-[11px] text-zinc-500 truncate">
-                          {res.author} • {res.totalPages} págs
+                          {res.author} • {res.totalPages} páginas
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Jikan Manga search suggestions */}
+              {mangaResults.length > 0 && (
+                <div className="mt-3 space-y-1.5 max-h-44 overflow-y-auto border-t border-amber-200/60 dark:border-amber-900/40 pt-2">
+                  <p className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
+                    Mangás encontrados (MyAnimeList / Jikan):
+                  </p>
+                  {mangaResults.map((res, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleSelectJikanManga(res)}
+                      className="p-2 rounded-lg bg-white dark:bg-zinc-800/80 hover:bg-amber-100 dark:hover:bg-amber-950/50 cursor-pointer flex items-center gap-3 transition-colors text-left"
+                    >
+                      {res.coverUrl ? (
+                        <img src={res.coverUrl} alt={res.title} className="w-7 h-10 object-cover rounded" />
+                      ) : (
+                        <div className="w-7 h-10 bg-zinc-200 dark:bg-zinc-700 rounded flex items-center justify-center">
+                          <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-semibold text-zinc-950 dark:text-zinc-100 font-medium truncate">
+                            {res.title}
+                          </p>
+                          {res.score && (
+                            <span className="text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded">
+                              ★ {res.score.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-zinc-500 truncate">
+                          {res.author} • {res.totalChapters} capítulos • {res.genre}
                         </p>
                       </div>
                     </div>
@@ -193,32 +309,69 @@ export default function BookModal({
           )}
 
           <form id="book-form" onSubmit={handleSubmit} className="space-y-4">
+            {/* Media Type & Units */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  Tipo de Obra
+                </label>
+                <select
+                  value={mediaType}
+                  onChange={(e) => {
+                    const type = e.target.value as MediaType;
+                    setMediaType(type);
+                    setUnitType(type === 'manga' ? 'chapters' : 'pages');
+                    if (type === 'manga' && genre === 'Literatura') setGenre('Mangá');
+                  }}
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
+                >
+                  <option value="book">📚 Livro / Literatura</option>
+                  <option value="manga">⛩️ Mangá / HQ / Manhwa</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                  Unidade de Medida
+                </label>
+                <select
+                  value={unitType}
+                  onChange={(e) => setUnitType(e.target.value as UnitType)}
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
+                >
+                  <option value="pages">Páginas</option>
+                  <option value="chapters">Capítulos</option>
+                  <option value="volumes">Volumes</option>
+                </select>
+              </div>
+            </div>
+
             {/* Title & Author */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Título do Livro *
+                  Título da Obra *
                 </label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Nome do livro"
+                  placeholder="Nome do livro ou mangá"
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Autor(a) *
+                  Autor(a) / Mangaká *
                 </label>
                 <input
                   type="text"
                   required
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Nome do(a) autor(a)"
+                  placeholder="Nome do(a) criador(a)"
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
@@ -234,7 +387,7 @@ export default function BookModal({
                   type="text"
                   value={genre}
                   onChange={(e) => setGenre(e.target.value)}
-                  placeholder="Ficção, Filosofia, Fantasia..."
+                  placeholder="Shounen, Seinen, Ficção, Fantasia..."
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
@@ -253,7 +406,7 @@ export default function BookModal({
               </div>
             </div>
 
-            {/* Status & Pages */}
+            {/* Status & Progress Units */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -279,7 +432,7 @@ export default function BookModal({
 
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Páginas Lidas
+                  Lido ({unitType === 'chapters' ? 'Capítulos' : unitType === 'volumes' ? 'Volumes' : 'Páginas'})
                 </label>
                 <input
                   type="number"
@@ -293,7 +446,7 @@ export default function BookModal({
 
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Total de Páginas
+                  Total de {unitType === 'chapters' ? 'Capítulos' : unitType === 'volumes' ? 'Volumes' : 'Páginas'}
                 </label>
                 <input
                   type="number"
@@ -356,7 +509,7 @@ export default function BookModal({
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="O que você achou? O que este livro te ensinou?"
+                placeholder="O que você achou? O que esta obra te transmitiu?"
                 className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
               />
             </div>
@@ -377,7 +530,7 @@ export default function BookModal({
             form="book-form"
             className="px-5 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md shadow-amber-600/30 transition-all active:scale-95"
           >
-            {initialData ? 'Salvar Alterações' : 'Cadastrar Livro'}
+            {initialData ? 'Salvar Alterações' : 'Cadastrar Obra'}
           </button>
         </div>
       </div>

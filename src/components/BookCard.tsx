@@ -55,6 +55,11 @@ export default function BookCard({
       ? Math.min(100, Math.round(((book.currentPage || 0) / book.totalPages) * 100))
       : 0;
 
+  const unit = book.unitType || (book.mediaType === 'manga' ? 'chapters' : 'pages');
+  const unitShort = unit === 'chapters' ? 'caps' : unit === 'volumes' ? 'vols' : 'págs';
+  const quickAmount = unit === 'chapters' ? 1 : unit === 'volumes' ? 1 : 10;
+  const quickText = unit === 'chapters' ? '+1 cap' : unit === 'volumes' ? '+1 vol' : '+10p';
+
   const handleQuickAddPages = (e: React.MouseEvent, amount: number) => {
     e.stopPropagation();
     const target = Math.min(book.totalPages, (book.currentPage || 0) + amount);
@@ -102,7 +107,7 @@ export default function BookCard({
           {/* Fallback visual typography */}
           <div className="relative z-10 flex flex-col justify-between h-full text-white">
             <span className="text-[9px] uppercase tracking-wider text-amber-200 font-semibold truncate">
-              {book.genre || 'Livro'}
+              {book.mediaType === 'manga' ? '⛩️ Mangá' : book.genre || 'Livro'}
             </span>
             <div className="my-auto">
               <BookOpen className="w-5 h-5 text-amber-300/80 mb-1" />
@@ -118,13 +123,20 @@ export default function BookCard({
         <div className="flex-1 min-w-0 flex flex-col justify-between">
           <div>
             {/* Status and Category */}
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${status.bg} ${status.text} ${status.border}`}
-              >
-                {status.label}
-              </span>
-              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate max-w-[110px]">
+            <div className="flex items-center justify-between gap-1.5 mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${status.bg} ${status.text} ${status.border}`}
+                >
+                  {status.label}
+                </span>
+                {book.mediaType === 'manga' && (
+                  <span className="text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 px-1.5 py-0.2 rounded font-medium">
+                    ⛩️ Mangá
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate max-w-[100px]">
                 {book.genre}
               </span>
             </div>
@@ -161,7 +173,7 @@ export default function BookCard({
           <div>
             <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mb-1">
               <span>
-                {book.currentPage || 0} / {book.totalPages} págs
+                {book.currentPage || 0} / {book.totalPages} {unitShort}
               </span>
               <span className="font-semibold text-zinc-700 dark:text-zinc-300">{percent}%</span>
             </div>
@@ -187,11 +199,11 @@ export default function BookCard({
           {book.status !== 'completed' && percent < 100 ? (
             <>
               <button
-                onClick={(e) => handleQuickAddPages(e, 10)}
-                title="Avançar 10 páginas"
+                onClick={(e) => handleQuickAddPages(e, quickAmount)}
+                title={`Avançar ${quickText}`}
                 className="px-2 py-1 rounded bg-white dark:bg-zinc-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 font-medium text-[11px] flex items-center gap-1 transition-colors"
               >
-                <Plus className="w-3 h-3" /> 10p
+                <Plus className="w-3 h-3" /> {quickText}
               </button>
               <button
                 onClick={handleComplete}
@@ -215,7 +227,7 @@ export default function BookCard({
               e.stopPropagation();
               onEdit(book);
             }}
-            title="Editar livro"
+            title="Editar obra"
             className="p-1.5 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
           >
             <Edit2 className="w-3.5 h-3.5" />
@@ -227,7 +239,7 @@ export default function BookCard({
                 onDelete(book.id);
               }
             }}
-            title="Excluir livro"
+            title="Excluir obra"
             className="p-1.5 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />

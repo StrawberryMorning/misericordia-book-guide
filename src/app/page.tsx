@@ -64,6 +64,8 @@ export default function Home() {
         currentPage: bookData.currentPage || 0,
         status: bookData.status || 'want_to_read',
         rating: bookData.rating || 0,
+        mediaType: bookData.mediaType || 'book',
+        unitType: bookData.unitType || (bookData.mediaType === 'manga' ? 'chapters' : 'pages'),
         coverUrl: bookData.coverUrl || '',
         notes: bookData.notes || '',
         favoriteQuote: bookData.favoriteQuote || '',

@@ -14,8 +14,10 @@ Projetada com foco em experiência do usuário (UX), persistência local imediat
 
 ## ✨ Funcionalidades
 
-- **CRUD Completo de Livros:** Cadastro de título, autor(a), gênero, total de páginas, página atual, nota de 1 a 5 estrelas, frase marcante e anotações/resenhas.
-- **Autopreenchimento Inteligente (Google Books API):** Basta digitar o nome do livro e clicar em "Buscar" para preencher automaticamente título, autor, capa oficial e número de páginas.
+- **CRUD Completo de Livros e Mangás:** Cadastro de título, autor(a)/mangaká, gênero, total de páginas/capítulos, unidade de medida, nota de 1 a 5 estrelas, frase marcante e anotações/resenhas.
+- **Auto-preenchimento Duplo (Google Books + Jikan API):** 
+  - 📚 **Livros:** Busca rápida na Google Books API com capa, autor e páginas.
+  - ⛩️ **Mangás & HQs:** Busca em tempo real na **Jikan API (MyAnimeList)** trazendo títulos oficiais, mangakás, total de capítulos e nota da comunidade mundial.
 - **Painel de Estatísticas de Leitura:**
   - Total de livros lidos e em andamento.
   - Total de páginas consumidas.

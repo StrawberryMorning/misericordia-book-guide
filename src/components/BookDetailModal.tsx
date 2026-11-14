@@ -26,6 +26,9 @@ export default function BookDetailModal({
       ? Math.min(100, Math.round(((book.currentPage || 0) / book.totalPages) * 100))
       : 0;
 
+  const unit = book.unitType || (book.mediaType === 'manga' ? 'chapters' : 'pages');
+  const unitLabel = unit === 'chapters' ? 'capítulos' : unit === 'volumes' ? 'volumes' : 'páginas';
+
   const handlePageUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (pageInput === '') return;
@@ -43,7 +46,7 @@ export default function BookDetailModal({
         <div className="relative h-36 bg-gradient-to-r from-amber-800 via-amber-900 to-zinc-950 p-6 flex justify-between items-start text-white">
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase tracking-wider font-semibold text-amber-200 px-2.5 py-1 bg-white/10 backdrop-blur-sm rounded-full">
-              {book.genre}
+              {book.mediaType === 'manga' ? '⛩️ Mangá • ' : ''}{book.genre}
             </span>
           </div>
           <button
@@ -119,10 +122,10 @@ export default function BookDetailModal({
           <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800 mb-6">
             <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 mb-2">
               <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                Progresso de Leitura: {percent}%
+                Progresso: {percent}%
               </span>
               <span>
-                {book.currentPage} de {book.totalPages} páginas
+                {book.currentPage} de {book.totalPages} {unitLabel}
               </span>
             </div>
             <div className="w-full h-3 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden mb-3">
@@ -138,7 +141,7 @@ export default function BookDetailModal({
                 type="number"
                 min="0"
                 max={book.totalPages}
-                placeholder={`Ir para pág... (atual: ${book.currentPage})`}
+                placeholder={`Ir para ${unit === 'chapters' ? 'capítulo' : unit === 'volumes' ? 'volume' : 'página'}... (atual: ${book.currentPage})`}
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
@@ -147,7 +150,7 @@ export default function BookDetailModal({
                 type="submit"
                 className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold transition-colors"
               >
-                Atualizar Página
+                Atualizar Progresso
               </button>
             </form>
           </div>
