@@ -11,6 +11,7 @@ interface BookModalProps {
   onClose: () => void;
   onSave: (bookData: Partial<Book>) => void;
   initialData?: Book | null;
+  initialSearchQuery?: string;
 }
 
 export default function BookModal({
@@ -18,6 +19,7 @@ export default function BookModal({
   onClose,
   onSave,
   initialData,
+  initialSearchQuery,
 }: BookModalProps) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -70,9 +72,20 @@ export default function BookModal({
     }
     setBookResults([]);
     setMangaResults([]);
-    setSearchQuery('');
     setHasSearched(false);
-  }, [initialData, isOpen]);
+
+    if (initialSearchQuery && !initialData) {
+      setSearchQuery(initialSearchQuery);
+      setIsSearching(true);
+      setHasSearched(true);
+      searchGoogleBooks(initialSearchQuery).then((results) => {
+        setBookResults(results);
+        setIsSearching(false);
+      });
+    } else {
+      setSearchQuery('');
+    }
+  }, [initialData, isOpen, initialSearchQuery]);
 
   if (!isOpen) return null;
 

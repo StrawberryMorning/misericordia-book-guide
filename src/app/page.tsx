@@ -22,6 +22,7 @@ export default function Home() {
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalSearchPreFill, setModalSearchPreFill] = useState('');
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedDetailBook, setSelectedDetailBook] = useState<Book | null>(null);
 
@@ -224,20 +225,47 @@ export default function Home() {
             <h3 className="font-serif text-lg font-bold text-zinc-800 dark:text-zinc-200">
               Nenhum livro encontrado
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mt-1 mb-5">
-              {searchQuery
-                ? 'Nenhum resultado corresponde à sua busca atual.'
-                : 'Você ainda não cadastrou nenhum livro nesta categoria.'}
-            </p>
-            <button
-              onClick={() => {
-                setEditingBook(null);
-                setIsModalOpen(true);
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/30 transition-all"
-            >
-              <Plus className="w-4 h-4" /> Cadastrar Meu Primeiro Livro
-            </button>
+            {searchQuery ? (
+              <div className="space-y-4 mt-2">
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+                  Nenhum livro chamado &ldquo;{searchQuery}&rdquo; foi adicionado à sua estante pessoal ainda.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      setEditingBook(null);
+                      setModalSearchPreFill(searchQuery);
+                      setIsModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/30 transition-all"
+                  >
+                    <Plus className="w-4 h-4" /> Buscar &ldquo;{searchQuery}&rdquo; online para cadastrar
+                  </button>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="px-3.5 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-medium hover:bg-zinc-200 transition-colors"
+                  >
+                    Limpar filtro
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 mt-2">
+                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+                  Você ainda não cadastrou nenhum livro nesta categoria.
+                </p>
+                <button
+                  onClick={() => {
+                    setEditingBook(null);
+                    setModalSearchPreFill('');
+                    setIsModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/30 transition-all"
+                >
+                  <Plus className="w-4 h-4" /> Cadastrar Meu Primeiro Livro
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -253,9 +281,11 @@ export default function Home() {
       <BookModal
         isOpen={isModalOpen}
         initialData={editingBook}
+        initialSearchQuery={modalSearchPreFill}
         onClose={() => {
           setIsModalOpen(false);
           setEditingBook(null);
+          setModalSearchPreFill('');
         }}
         onSave={handleSaveBook}
       />
