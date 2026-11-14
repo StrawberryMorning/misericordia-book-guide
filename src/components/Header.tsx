@@ -1,25 +1,29 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { BookOpen, Plus, Download, Upload, Cloud, UserCheck, LogOut } from 'lucide-react';
+import { BookOpen, Plus, Download, Upload, Cloud, UserCheck, LogOut, Crown } from 'lucide-react';
 import { Book } from '@/types/book';
 import { exportBooksAsJSON } from '@/lib/storage';
 
 interface HeaderProps {
   books: Book[];
   userEmail?: string | null;
+  isAdmin?: boolean;
   onOpenNewModal: () => void;
   onImportBooks: (imported: Book[]) => void;
   onOpenAuthModal: () => void;
+  onOpenAdminModal?: () => void;
   onSignOut: () => void;
 }
 
 export default function Header({
   books,
   userEmail,
+  isAdmin = false,
   onOpenNewModal,
   onImportBooks,
   onOpenAuthModal,
+  onOpenAdminModal,
   onSignOut,
 }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,21 +76,45 @@ export default function Header({
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Cloud Auth Button */}
+          {/* Cloud Auth / Admin Button */}
           {userEmail ? (
-            <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-lg px-2 py-1 text-xs">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-emerald-800 dark:text-emerald-300 font-medium max-w-[100px] truncate hidden md:inline">
-                {userEmail.split('@')[0]}
-              </span>
-              <button
-                onClick={onSignOut}
-                title="Sair da conta"
-                className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition-colors"
-              >
-                <LogOut className="w-3 h-3" />
-              </button>
-            </div>
+            isAdmin ? (
+              /* Selo Especial do Criador / ADM */
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 border border-amber-500/40 dark:border-amber-400/40 rounded-xl px-2.5 py-1 text-xs shadow-sm shadow-amber-500/10">
+                <button
+                  type="button"
+                  onClick={onOpenAdminModal}
+                  className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-200 transition-colors"
+                  title="Abrir Painel do Criador (ADM)"
+                >
+                  <Crown className="w-4 h-4 text-amber-500 animate-pulse flex-shrink-0" />
+                  <span className="hidden sm:inline">Criador 🍓</span>
+                </button>
+                <div className="w-px h-3.5 bg-amber-500/30 mx-0.5" />
+                <button
+                  onClick={onSignOut}
+                  title="Sair da conta de Criador"
+                  className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-0.5 transition-colors"
+                >
+                  <LogOut className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              /* Usuário Comum */
+              <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-lg px-2 py-1 text-xs">
+                <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-emerald-800 dark:text-emerald-300 font-medium max-w-[100px] truncate hidden md:inline">
+                  {userEmail.split('@')[0]}
+                </span>
+                <button
+                  onClick={onSignOut}
+                  title="Sair da conta"
+                  className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition-colors"
+                >
+                  <LogOut className="w-3 h-3" />
+                </button>
+              </div>
+            )
           ) : (
             <button
               onClick={onOpenAuthModal}

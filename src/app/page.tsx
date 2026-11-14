@@ -8,6 +8,7 @@ import BookCard from '@/components/BookCard';
 import BookModal from '@/components/BookModal';
 import BookDetailModal from '@/components/BookDetailModal';
 import AuthModal from '@/components/AuthModal';
+import AdminModal from '@/components/AdminModal';
 import { Book, BookStatus, SortOption } from '@/types/book';
 import { saveStoredBooks } from '@/lib/storage';
 import { getSupabaseClient } from '@/lib/supabaseClient';
@@ -17,13 +18,17 @@ import {
   syncDeleteBook,
   migrateLocalBooksToCloud,
 } from '@/lib/bookService';
-import { BookOpen, Plus, CheckCircle2 } from 'lucide-react';
+import { isAdminUser } from '@/lib/admin';
+import { BookOpen, Plus, CheckCircle2, Megaphone } from 'lucide-react';
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Announcement state
+  const [announcement, setAnnouncement] = useState<string>('');
 
   // Filters & Sorting
   const [selectedStatus, setSelectedStatus] = useState<'all' | BookStatus>('all');
@@ -33,9 +38,36 @@ export default function Home() {
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [modalSearchPreFill, setModalSearchPreFill] = useState('');
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedDetailBook, setSelectedDetailBook] = useState<Book | null>(null);
+
+  // Check if current logged-in user is Admin
+  const isAdmin = useMemo(() => isAdminUser(userEmail), [userEmail]);
+
+  // Load announcement from storage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedNotice = localStorage.getItem('le_loisir_announcement');
+      if (savedNotice) {
+        setAnnouncement(savedNotice);
+      } else {
+        setAnnouncement('🍓 Bem-vindo ao Le Loisir! Aproveite suas leituras e registre suas reflexões.');
+      }
+    }
+  }, []);
+
+  const handleSaveAnnouncement = (msg: string) => {
+    setAnnouncement(msg);
+    if (typeof window !== 'undefined') {
+      if (msg) {
+        localStorage.setItem('le_loisir_announcement', msg);
+      } else {
+        localStorage.removeItem('le_loisir_announcement');
+      }
+    }
+  };
 
   // Load books and auth state on mount
   useEffect(() => {
@@ -259,21 +291,41 @@ export default function Home() {
         </div>
       )}
 
-      {/* Top Header */}
+      {/* Top Header with Creator / Admin detection */}
       <Header
         books={books}
         userEmail={userEmail}
+        isAdmin={isAdmin}
         onOpenNewModal={() => {
           setEditingBook(null);
           setIsModalOpen(true);
         }}
         onImportBooks={handleImportBooks}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenAdminModal={() => setIsAdminModalOpen(true)}
         onSignOut={handleSignOut}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Creator Announcement Banner (if configured) */}
+        {announcement && (
+          <div className="mb-5 p-3.5 bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/10 border border-rose-500/20 dark:border-rose-500/30 rounded-2xl flex items-center justify-between gap-3 text-xs text-zinc-800 dark:text-zinc-200 shadow-sm">
+            <div className="flex items-center gap-2 min-w-0">
+              <Megaphone className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+              <span className="font-medium truncate sm:whitespace-normal">{announcement}</span>
+            </div>
+            {isAdmin && (
+              <button
+                onClick={() => setIsAdminModalOpen(true)}
+                className="text-[11px] text-amber-700 dark:text-amber-400 hover:underline font-semibold flex-shrink-0"
+              >
+                Editar
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Welcome Banner */}
         <div className="mb-4">
           <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -412,11 +464,11 @@ export default function Home() {
           {/* Version Tracker Badge (SemVer) */}
           <div className="flex items-center gap-2">
             <div
-              title="Versionamento Semântico: v1.3.0 (Sincronização em Nuvem Supabase + Contas)"
+              title="Versionamento Semântico: v1.4.0 (Painel do Criador & Privilégios ADM)"
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>v1.3.0</span>
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>v1.4.0</span>
             </div>
           </div>
         </div>
@@ -452,6 +504,16 @@ export default function Home() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Creator / Admin Panel Modal */}
+      <AdminModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        userEmail={userEmail || ''}
+        books={books}
+        announcement={announcement}
+        onSaveAnnouncement={handleSaveAnnouncement}
       />
     </div>
   );
