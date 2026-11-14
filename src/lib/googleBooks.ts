@@ -24,10 +24,16 @@ interface GoogleApiItem {
 export async function searchGoogleBooks(query: string): Promise<GoogleBookSearchResult[]> {
   if (!query || query.trim().length < 2) return [];
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+
   try {
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&langRestrict=pt`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&langRestrict=pt`,
+      { signal: controller.signal }
     );
+    clearTimeout(timer);
+
     if (!res.ok) return [];
 
     const data = await res.json();
@@ -52,6 +58,7 @@ export async function searchGoogleBooks(query: string): Promise<GoogleBookSearch
       };
     });
   } catch (err) {
+    clearTimeout(timer);
     console.error('Falha ao buscar livro na Google Books API:', err);
     return [];
   }

@@ -36,6 +36,7 @@ export default function BookModal({
   const [searchProvider, setSearchProvider] = useState<'books' | 'manga'>('books');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [bookResults, setBookResults] = useState<GoogleBookSearchResult[]>([]);
   const [mangaResults, setMangaResults] = useState<JikanMangaSearchResult[]>([]);
 
@@ -70,6 +71,7 @@ export default function BookModal({
     setBookResults([]);
     setMangaResults([]);
     setSearchQuery('');
+    setHasSearched(false);
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
@@ -78,17 +80,21 @@ export default function BookModal({
     e.preventDefault();
     if (!searchQuery.trim()) return;
     setIsSearching(true);
+    setHasSearched(true);
     setBookResults([]);
     setMangaResults([]);
 
-    if (searchProvider === 'books') {
-      const results = await searchGoogleBooks(searchQuery);
-      setBookResults(results);
-    } else {
-      const results = await searchJikanManga(searchQuery);
-      setMangaResults(results);
+    try {
+      if (searchProvider === 'books') {
+        const results = await searchGoogleBooks(searchQuery);
+        setBookResults(results);
+      } else {
+        const results = await searchJikanManga(searchQuery);
+        setMangaResults(results);
+      }
+    } finally {
+      setIsSearching(false);
     }
-    setIsSearching(false);
   };
 
   const handleSelectGoogleBook = (result: GoogleBookSearchResult) => {
@@ -271,7 +277,7 @@ export default function BookModal({
               {mangaResults.length > 0 && (
                 <div className="mt-3 space-y-1.5 max-h-44 overflow-y-auto border-t border-amber-200/60 dark:border-amber-900/40 pt-2">
                   <p className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
-                    Mangás encontrados (MyAnimeList / Jikan):
+                    Mangás encontrados ({mangaResults[0]?.source || 'Catálogo Online'}):
                   </p>
                   {mangaResults.map((res, idx) => (
                     <div
@@ -296,6 +302,9 @@ export default function BookModal({
                               ★ {res.score.toFixed(1)}
                             </span>
                           )}
+                          <span className="text-[9px] bg-zinc-100 dark:bg-zinc-700 text-zinc-500 px-1 rounded ml-auto">
+                            {res.source}
+                          </span>
                         </div>
                         <p className="text-[11px] text-zinc-500 truncate">
                           {res.author} • {res.totalChapters} capítulos • {res.genre}
@@ -303,6 +312,18 @@ export default function BookModal({
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Empty / Not Found feedback */}
+              {hasSearched && !isSearching && bookResults.length === 0 && mangaResults.length === 0 && (
+                <div className="mt-2.5 p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-600 dark:text-zinc-300 flex items-center justify-between">
+                  <span>
+                    Nenhum resultado online para &ldquo;{searchQuery}&rdquo;.
+                  </span>
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                    Preencha os campos abaixo manualmente ✍️
+                  </span>
                 </div>
               )}
             </div>
