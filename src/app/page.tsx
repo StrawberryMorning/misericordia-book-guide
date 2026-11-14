@@ -9,6 +9,7 @@ import BookModal from '@/components/BookModal';
 import BookDetailModal from '@/components/BookDetailModal';
 import AuthModal from '@/components/AuthModal';
 import AdminModal from '@/components/AdminModal';
+import ProfileModal from '@/components/ProfileModal';
 import { Book, BookStatus, SortOption } from '@/types/book';
 import { saveStoredBooks } from '@/lib/storage';
 import { getSupabaseClient } from '@/lib/supabaseClient';
@@ -25,6 +26,7 @@ export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Announcement state
@@ -39,6 +41,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [modalSearchPreFill, setModalSearchPreFill] = useState('');
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedDetailBook, setSelectedDetailBook] = useState<Book | null>(null);
@@ -85,16 +88,24 @@ export default function Home() {
       const client = getSupabaseClient();
       if (client) {
         const { data: { user } } = await client.auth.getUser();
-        if (user?.email && isMounted) {
-          setUserEmail(user.email);
+        if (user && isMounted) {
+          setUserEmail(user.email || null);
+          const dName = user.user_metadata?.display_name || user.email?.split('@')[0] || '';
+          setUserName(dName);
         }
 
         // 3. Listen to auth changes
         const { data: { subscription } } = client.auth.onAuthStateChange(
           async (event, session) => {
             if (!isMounted) return;
-            if (session?.user?.email) {
-              setUserEmail(session.user.email);
+            if (session?.user) {
+              setUserEmail(session.user.email || null);
+              const dName =
+                session.user.user_metadata?.display_name ||
+                session.user.email?.split('@')[0] ||
+                '';
+              setUserName(dName);
+
               if (event === 'SIGNED_IN') {
                 const count = await migrateLocalBooksToCloud();
                 if (count > 0) {
@@ -106,6 +117,7 @@ export default function Home() {
               }
             } else if (event === 'SIGNED_OUT') {
               setUserEmail(null);
+              setUserName('');
               const localBooks = await fetchBooks();
               setBooks(localBooks);
             }
@@ -209,6 +221,7 @@ export default function Home() {
     if (client) {
       await client.auth.signOut();
       setUserEmail(null);
+      setUserName('');
       setToastMessage('Você saiu da conta. Seus dados continuam no cache deste dispositivo.');
       setTimeout(() => setToastMessage(null), 3500);
     }
@@ -219,8 +232,10 @@ export default function Home() {
     const client = getSupabaseClient();
     if (client) {
       const { data: { user } } = await client.auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email);
+      if (user) {
+        setUserEmail(user.email || null);
+        const dName = user.user_metadata?.display_name || user.email?.split('@')[0] || '';
+        setUserName(dName);
         const count = await migrateLocalBooksToCloud();
         const cloudBooks = await fetchBooks();
         setBooks(cloudBooks);
@@ -291,10 +306,11 @@ export default function Home() {
         </div>
       )}
 
-      {/* Top Header with Creator / Admin detection */}
+      {/* Top Header with Creator / Admin & Display Name support */}
       <Header
         books={books}
         userEmail={userEmail}
+        userName={userName}
         isAdmin={isAdmin}
         onOpenNewModal={() => {
           setEditingBook(null);
@@ -303,6 +319,7 @@ export default function Home() {
         onImportBooks={handleImportBooks}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenAdminModal={() => setIsAdminModalOpen(true)}
+        onOpenProfileModal={() => setIsProfileModalOpen(true)}
         onSignOut={handleSignOut}
       />
 
@@ -464,11 +481,11 @@ export default function Home() {
           {/* Version Tracker Badge (SemVer) */}
           <div className="flex items-center gap-2">
             <div
-              title="Versionamento Semântico: v1.4.0 (Painel do Criador & Privilégios ADM)"
+              title="Versionamento Semântico: v1.5.0 (Perfis Personalizados & Nomes de Exibição Livres)"
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300"
             >
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>v1.4.0</span>
+              <span>v1.5.0</span>
             </div>
           </div>
         </div>
@@ -514,6 +531,19 @@ export default function Home() {
         books={books}
         announcement={announcement}
         onSaveAnnouncement={handleSaveAnnouncement}
+      />
+
+      {/* Profile Edit Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        userEmail={userEmail || ''}
+        currentName={userName}
+        onUpdateName={(newName) => {
+          setUserName(newName);
+          setToastMessage('Nome de perfil atualizado com sucesso! ✨');
+          setTimeout(() => setToastMessage(null), 3000);
+        }}
       />
     </div>
   );

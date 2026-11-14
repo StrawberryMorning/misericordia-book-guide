@@ -19,6 +19,7 @@ import {
   ExternalLink,
   KeyRound,
   Settings,
+  User,
 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -29,6 +30,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,9 +65,21 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           onClose();
         }, 1200);
       } else {
-        const { error } = await client.auth.signUp({ email, password });
+        const finalDisplayName = name.trim() || email.split('@')[0];
+        const { error } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: finalDisplayName,
+            },
+          },
+        });
         if (error) throw error;
-        setMessage({ text: 'Conta criada! Verifique seu email para confirmar ou faça login.', type: 'success' });
+        setMessage({ text: 'Conta criada! Faça login para acessar sua estante.', type: 'success' });
+        setTimeout(() => {
+          setMode('login');
+        }, 1500);
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Erro ao autenticar.';
@@ -240,6 +254,26 @@ create policy "Usuários podem excluir seus próprios livros"
 
               {/* Email / Password Form */}
               <form onSubmit={handleAuth} className="space-y-3">
+                {mode === 'signup' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1 flex items-center justify-between">
+                      <span>Nome ou Apelido</span>
+                      <span className="text-[10px] text-zinc-400 font-normal">Opcional</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        maxLength={30}
+                        placeholder="Ex: Lucas, Moranguinho... (opcional)"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100 font-medium"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                     Email

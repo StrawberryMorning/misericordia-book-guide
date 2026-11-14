@@ -1,29 +1,33 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { BookOpen, Plus, Download, Upload, Cloud, UserCheck, LogOut, Crown } from 'lucide-react';
+import { BookOpen, Plus, Download, Upload, Cloud, UserCheck, LogOut, Crown, Edit3 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { exportBooksAsJSON } from '@/lib/storage';
 
 interface HeaderProps {
   books: Book[];
   userEmail?: string | null;
+  userName?: string | null;
   isAdmin?: boolean;
   onOpenNewModal: () => void;
   onImportBooks: (imported: Book[]) => void;
   onOpenAuthModal: () => void;
   onOpenAdminModal?: () => void;
+  onOpenProfileModal?: () => void;
   onSignOut: () => void;
 }
 
 export default function Header({
   books,
   userEmail,
+  userName,
   isAdmin = false,
   onOpenNewModal,
   onImportBooks,
   onOpenAuthModal,
   onOpenAdminModal,
+  onOpenProfileModal,
   onSignOut,
 }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +54,8 @@ export default function Header({
     reader.readAsText(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const displayName = userName || userEmail?.split('@')[0] || '';
 
   return (
     <header className="border-b border-amber-900/10 dark:border-amber-100/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-30 transition-colors">
@@ -89,8 +95,19 @@ export default function Header({
                 >
                   <Crown className="w-4 h-4 text-amber-500 animate-pulse flex-shrink-0" />
                   <span className="hidden sm:inline">Criador 🍓</span>
+                  <span className="text-zinc-600 dark:text-zinc-400 font-medium max-w-[90px] truncate">
+                    ({displayName})
+                  </span>
                 </button>
                 <div className="w-px h-3.5 bg-amber-500/30 mx-0.5" />
+                <button
+                  type="button"
+                  onClick={onOpenProfileModal}
+                  title="Editar nome de perfil"
+                  className="text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 p-0.5 transition-colors"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={onSignOut}
                   title="Sair da conta de Criador"
@@ -100,16 +117,23 @@ export default function Header({
                 </button>
               </div>
             ) : (
-              /* Usuário Comum */
-              <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-lg px-2 py-1 text-xs">
-                <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-emerald-800 dark:text-emerald-300 font-medium max-w-[100px] truncate hidden md:inline">
-                  {userEmail.split('@')[0]}
-                </span>
+              /* Usuário Comum com Nome de Exibição e Botão de Editar */
+              <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-xl px-2.5 py-1 text-xs">
+                <button
+                  type="button"
+                  onClick={onOpenProfileModal}
+                  className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-medium hover:underline max-w-[120px] truncate"
+                  title="Clique para editar seu nome de exibição"
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">{displayName}</span>
+                  <Edit3 className="w-3 h-3 text-emerald-600/70" />
+                </button>
+                <div className="w-px h-3.5 bg-emerald-300 dark:bg-emerald-800 mx-0.5" />
                 <button
                   onClick={onSignOut}
                   title="Sair da conta"
-                  className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition-colors"
+                  className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-0.5 transition-colors"
                 >
                   <LogOut className="w-3 h-3" />
                 </button>
