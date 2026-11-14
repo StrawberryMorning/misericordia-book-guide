@@ -1,9 +1,10 @@
-# 📚 Misericórdia Books - Registro e Diário de Leitura
+# 🍓 Le Loisir &bull; Registro de Leitura & Mangás
 
-Uma aplicação web moderna, minimalista e elegante para rastreamento de leitura, acompanhamento de hábitos e registro de citações.
+Uma aplicação web moderna, minimalista e acolhedora para rastreamento de leitura, acompanhamento de hábitos e registro de citações. Criado e mantido por **Manhã de Morango** ([@StrawberryMorning](https://github.com/StrawberryMorning)).
 
 Projetada com foco em experiência do usuário (UX), persistência local imediata e pronta para escalabilidade multiplataforma (Web e Mobile com Flutter).
 
+![Version](https://img.shields.io/badge/Version-v1.2.0-rose?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)

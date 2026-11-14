@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { BookOpen, Plus, Download, Upload, Sparkles } from 'lucide-react';
+import { BookOpen, Plus, Download, Upload } from 'lucide-react';
 import { Book } from '@/types/book';
 import { exportBooksAsJSON } from '@/lib/storage';
 
@@ -42,20 +42,20 @@ export default function Header({ books, onOpenNewModal, onImportBooks }: HeaderP
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between">
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-rose-600 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                Misericórdia <span className="text-amber-600 dark:text-amber-500 font-sans font-medium text-lg">Books</span>
+                Le Loisir <span className="text-rose-600 dark:text-rose-400 font-sans font-medium text-xs sm:text-sm tracking-normal">🍓</span>
               </h1>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full">
-                <Sparkles className="w-3 h-3" /> MVP
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40 px-2 py-0.5 rounded-full">
+                Manhã de Morango
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
-              Seu santuário de leitura e registro pessoal
+              Seu santuário de leitura &amp; mangás
             </p>
           </div>
         </div>

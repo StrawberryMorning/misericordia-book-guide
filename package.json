@@ -1,6 +1,6 @@
 {
-  "name": "misericordia_book_guide",
-  "version": "0.1.0",
+  "name": "le-loisir",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

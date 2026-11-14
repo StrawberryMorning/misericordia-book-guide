@@ -179,10 +179,10 @@ export default function Home() {
         {/* Welcome Banner */}
         <div className="mb-4">
           <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Meu Registro de Leitura
+            Le Loisir &bull; Minha Estante
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Acompanhe seu progresso, registre suas citações favoritas e construa o seu hábito diário.
+            Acompanhe suas leituras de livros e mangás, registre citações marcantes e cultive seu momento de lazer.
           </p>
         </div>
 
@@ -270,11 +270,58 @@ export default function Home() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800/80 py-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        <p>
-          Misericórdia Book Guide • Desenvolvido com Next.js, Tailwind CSS e TypeScript
-        </p>
+      {/* Footer with Manhã de Morango branding & Version Tracker */}
+      <footer className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/40 dark:bg-zinc-900/40 py-8 px-4 text-center">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Brand Signature */}
+          <div className="flex items-center gap-3">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-rose-500/80 shadow-md shadow-rose-500/20 flex-shrink-0 bg-rose-100 dark:bg-rose-950">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/strawberry-elephant.jpg"
+                alt="Elefante de Morango - Manhã de Morango"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="text-left">
+              <div className="flex items-center gap-1.5">
+                <span className="font-serif font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                  Manhã de Morango
+                </span>
+                <span className="text-xs">🍓</span>
+              </div>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Criado por{' '}
+                <a
+                  href="https://github.com/StrawberryMorning"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-rose-600 dark:text-rose-400 hover:underline"
+                >
+                  @StrawberryMorning
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* App Name and Philosophy */}
+          <div className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="font-serif italic text-zinc-700 dark:text-zinc-300">
+              Le Loisir &bull; O tempo dedicado ao que realmente importa
+            </p>
+          </div>
+
+          {/* Version Tracker Badge (SemVer) */}
+          <div className="flex items-center gap-2">
+            <div
+              title="Versionamento Semântico: v1.2.0 (Suporte a Mangás & Open Library)"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>v1.2.0</span>
+            </div>
+          </div>
+        </div>
       </footer>
 
       {/* Add / Edit Modal */}

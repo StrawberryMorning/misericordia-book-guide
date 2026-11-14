@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Misericórdia Books - Registro e Diário de Leitura',
-  description: 'Seu diário e registro pessoal de leitura: acompanhe páginas, notas, citações e construa seu hábito.',
+  title: 'Le Loisir - Registro de Leitura & Mangás',
+  description: 'Seu santuário de leitura e registro pessoal de livros e mangás. Desenvolvido por Manhã de Morango.',
 };
 
 export default function RootLayout({
