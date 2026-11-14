@@ -51,7 +51,7 @@ export default function FilterBar({
             placeholder="Buscar por título, autor ou gênero..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all text-zinc-900 dark:text-zinc-100"
+            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all text-zinc-950 dark:text-zinc-100 font-medium"
           />
           {searchQuery && (
             <button
@@ -70,7 +70,7 @@ export default function FilterBar({
             <select
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="pl-8 pr-8 py-2.5 bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 cursor-pointer appearance-none transition-all"
+              className="pl-8 pr-8 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl text-sm text-zinc-950 dark:text-zinc-100 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 cursor-pointer appearance-none transition-all"
             >
               <option value="recent">Mais Recentes</option>
               <option value="rating">Maior Avaliação</option>

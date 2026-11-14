@@ -116,7 +116,7 @@ export default function BookDetailModal({
           </div>
 
           {/* Progress Tracker Card */}
-          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-850/80 border border-zinc-200/80 dark:border-zinc-800 mb-6">
+          <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800 mb-6">
             <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 mb-2">
               <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                 Progresso de Leitura: {percent}%
@@ -141,7 +141,7 @@ export default function BookDetailModal({
                 placeholder={`Ir para pág... (atual: ${book.currentPage})`}
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
-                className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
               />
               <button
                 type="submit"
@@ -171,7 +171,7 @@ export default function BookDetailModal({
               <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                 Minhas Anotações &amp; Resenha
               </h4>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-850/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
                 {book.notes}
               </p>
             </div>

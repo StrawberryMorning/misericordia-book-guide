@@ -63,7 +63,7 @@ export default function StatsCards({ books }: StatsCardsProps) {
         return (
           <div
             key={idx}
-            className="p-4 rounded-2xl bg-white dark:bg-zinc-850/80 border border-zinc-200/80 dark:border-zinc-800 shadow-sm hover:shadow transition-all"
+            className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm hover:shadow transition-all"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">

@@ -115,7 +115,7 @@ export default function BookModal({
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-serif text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <h2 className="font-serif text-lg font-bold text-zinc-950 dark:text-zinc-100 font-medium">
                 {initialData ? 'Editar Livro' : 'Adicionar Novo Livro'}
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -146,7 +146,7 @@ export default function BookModal({
                   placeholder="Ex: O Hobbit, Harry Potter, Sapiens..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-850 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="flex-1 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
                 <button
                   type="submit"
@@ -178,7 +178,7 @@ export default function BookModal({
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                        <p className="text-xs font-semibold text-zinc-950 dark:text-zinc-100 font-medium truncate">
                           {res.title}
                         </p>
                         <p className="text-[11px] text-zinc-500 truncate">
@@ -205,7 +205,7 @@ export default function BookModal({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Nome do livro"
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
 
@@ -219,7 +219,7 @@ export default function BookModal({
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Nome do(a) autor(a)"
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function BookModal({
                   value={genre}
                   onChange={(e) => setGenre(e.target.value)}
                   placeholder="Ficção, Filosofia, Fantasia..."
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
 
@@ -248,7 +248,7 @@ export default function BookModal({
                   value={coverUrl}
                   onChange={(e) => setCoverUrl(e.target.value)}
                   placeholder="https://exemplo.com/capa.jpg"
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function BookModal({
                       setCurrentPage(totalPages);
                     }
                   }}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 >
                   <option value="want_to_read">Quero Ler</option>
                   <option value="reading">Lendo</option>
@@ -287,7 +287,7 @@ export default function BookModal({
                   max={totalPages}
                   value={currentPage}
                   onChange={(e) => setCurrentPage(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
 
@@ -300,7 +300,7 @@ export default function BookModal({
                   min="1"
                   value={totalPages}
                   onChange={(e) => setTotalPages(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
                 />
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function BookModal({
                 value={favoriteQuote}
                 onChange={(e) => setFavoriteQuote(e.target.value)}
                 placeholder="Uma frase inesquecível da obra..."
-                className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100 italic"
+                className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium italic"
               />
             </div>
 
@@ -357,7 +357,7 @@ export default function BookModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="O que você achou? O que este livro te ensinou?"
-                className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-900 dark:text-zinc-100"
+                className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-zinc-950 dark:text-zinc-100 font-medium"
               />
             </div>
           </form>

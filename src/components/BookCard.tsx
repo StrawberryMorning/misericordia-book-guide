@@ -83,7 +83,7 @@ export default function BookCard({
   return (
     <div
       onClick={() => onClick(book)}
-      className="group relative bg-white dark:bg-zinc-850 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 hover:border-amber-500/40 dark:hover:border-amber-500/40 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
+      className="group relative bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/90 dark:border-zinc-800 hover:border-amber-500/40 dark:hover:border-amber-500/40 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
     >
       <div className="p-4 sm:p-5 flex gap-4 flex-1">
         {/* Book Cover or Fallback */}
