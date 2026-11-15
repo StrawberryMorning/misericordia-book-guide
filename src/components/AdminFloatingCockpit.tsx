@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { getSupabaseClient } from '@/lib/supabaseClient';
+import packageInfo from '../../package.json';
 
 interface AdminFloatingCockpitProps {
   isAdmin: boolean;
@@ -271,7 +272,7 @@ export default function AdminFloatingCockpit({
               >
                 <Layers className="w-3 h-3" /> GitHub Repo <ExternalLink className="w-2.5 h-2.5" />
               </a>
-              <span className="font-mono text-[10px] text-zinc-400">v1.7.0</span>
+              <span className="font-mono text-[10px] text-zinc-400">v{packageInfo.version}</span>
             </div>
           </div>
         </div>
