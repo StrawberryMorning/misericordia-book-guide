@@ -482,11 +482,11 @@ export default function Home() {
           {/* Version Tracker Badge (SemVer) */}
           <div className="flex items-center gap-2">
             <div
-              title="Versionamento Semântico: v1.6.0 (Cockpit Flutuante de ADM & Telemetria em Tempo Real)"
+              title="Versionamento Semântico: v1.7.0 (Busca em Cascata Multi-API & Lightbox de Capas em Alta Definição)"
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>v1.6.0</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>v1.7.0</span>
             </div>
           </div>
         </div>

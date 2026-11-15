@@ -9,7 +9,7 @@ export interface JikanMangaSearchResult {
   synopsis?: string;
   score?: number;
   status: string;
-  source: 'MyAnimeList' | 'AniList';
+  source: 'MyAnimeList' | 'AniList' | 'MangaDex';
 }
 
 interface JikanRawItem {
@@ -35,7 +35,7 @@ interface AniListMediaItem {
   title?: { romaji?: string; english?: string };
   chapters?: number | null;
   volumes?: number | null;
-  coverImage?: { large?: string; medium?: string };
+  coverImage?: { large?: string; medium?: string; extraLarge?: string };
   description?: string;
   genres?: string[];
   averageScore?: number;
@@ -43,6 +43,26 @@ interface AniListMediaItem {
   staff?: {
     nodes?: Array<{ name?: { full?: string } }>;
   };
+}
+
+interface MangaDexItem {
+  id: string;
+  attributes?: {
+    title?: Record<string, string>;
+    altTitles?: Array<Record<string, string>>;
+    description?: Record<string, string>;
+    lastVolume?: string;
+    lastChapter?: string;
+    status?: string;
+    tags?: Array<{ attributes?: { name?: { en?: string } } }>;
+  };
+  relationships?: Array<{
+    type: string;
+    attributes?: {
+      fileName?: string;
+      name?: string;
+    };
+  }>;
 }
 
 // 1. Fetch from Jikan (MyAnimeList) with timeout
@@ -118,6 +138,7 @@ async function fetchFromAniList(query: string, timeoutMs = 3500): Promise<JikanM
           chapters
           volumes
           coverImage {
+            extraLarge
             large
             medium
           }
@@ -168,7 +189,7 @@ async function fetchFromAniList(query: string, timeoutMs = 3500): Promise<JikanM
         genre: item.genres?.slice(0, 2).join(' / ') || 'Mangá',
         totalChapters: item.chapters && item.chapters > 0 ? item.chapters : 50,
         totalVolumes: item.volumes && item.volumes > 0 ? item.volumes : 1,
-        coverUrl: item.coverImage?.large || item.coverImage?.medium || '',
+        coverUrl: item.coverImage?.extraLarge || item.coverImage?.large || item.coverImage?.medium || '',
         synopsis: cleanDesc,
         score: item.averageScore ? item.averageScore / 10 : undefined,
         status: item.status || 'FINISHED',
@@ -181,17 +202,96 @@ async function fetchFromAniList(query: string, timeoutMs = 3500): Promise<JikanM
   }
 }
 
-// Main Search function: runs with fast fallback
+// 3. Fetch from MangaDex (HD Covers, PT-BR titles & synopses)
+async function fetchFromMangaDex(query: string, timeoutMs = 3500): Promise<JikanMangaSearchResult[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(
+      `https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=6&includes[]=cover_art&includes[]=author`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timer);
+
+    if (!res.ok) return [];
+    const json = await res.json();
+    if (!json.data || !Array.isArray(json.data)) return [];
+
+    return json.data.map((item: MangaDexItem) => {
+      const attrs = item.attributes || {};
+
+      // Prefer English or Japanese Romaji title
+      const titleObj = attrs.title || {};
+      const title =
+        titleObj.en ||
+        titleObj['ja-ro'] ||
+        (attrs.altTitles && attrs.altTitles.find((t) => t.en)?.en) ||
+        Object.values(titleObj)[0] ||
+        'Sem título';
+
+      // Find Cover Art fileName from relationships
+      const coverRel = item.relationships?.find((r) => r.type === 'cover_art');
+      const coverFileName = coverRel?.attributes?.fileName;
+      const coverUrl = coverFileName
+        ? `https://uploads.mangadex.org/covers/${item.id}/${coverFileName}.512.jpg`
+        : '';
+
+      // Find Author name
+      const authorRel = item.relationships?.find((r) => r.type === 'author');
+      const author = authorRel?.attributes?.name || 'Mangaká';
+
+      // Prioritize Portuguese description, then English
+      const descObj = attrs.description || {};
+      const synopsis = descObj['pt-br'] || descObj.en || Object.values(descObj)[0] || '';
+
+      // Genres
+      const genres =
+        attrs.tags
+          ?.map((t) => t.attributes?.name?.en)
+          .filter(Boolean)
+          .slice(0, 2)
+          .join(' / ') || 'Mangá';
+
+      const chaptersNum = attrs.lastChapter ? Math.round(Number(attrs.lastChapter)) : 0;
+      const volumesNum = attrs.lastVolume ? Math.round(Number(attrs.lastVolume)) : 0;
+
+      return {
+        malId: `md-${item.id}`,
+        title,
+        author,
+        genre: genres,
+        totalChapters: chaptersNum > 0 ? chaptersNum : 50,
+        totalVolumes: volumesNum > 0 ? volumesNum : 1,
+        coverUrl,
+        synopsis,
+        status: attrs.status || 'completed',
+        source: 'MangaDex',
+      };
+    });
+  } catch {
+    clearTimeout(timer);
+    return [];
+  }
+}
+
+// Cascata de 3 Níveis para Mangás (Jikan -> AniList -> MangaDex)
 export async function searchJikanManga(query: string): Promise<JikanMangaSearchResult[]> {
   if (!query || query.trim().length < 2) return [];
 
-  // Try Jikan first (3.5s timeout)
+  // Nível 1: Tenta Jikan / MyAnimeList primeiro
   const jikanResults = await fetchFromJikan(query, 3500);
   if (jikanResults.length > 0) {
     return jikanResults;
   }
 
-  // If Jikan was slow, empty, or failed, fallback to AniList
-  const anilistResults = await fetchFromAniList(query, 3500);
-  return anilistResults;
+  // Nível 2: Se falhar ou demorar, tenta AniList
+  const anilistResults = await fetchFromAniList(query, 3000);
+  if (anilistResults.length > 0) {
+    return anilistResults;
+  }
+
+  // Nível 3: Se nenhum dos dois achar, tenta MangaDex (Capas HD + PT-BR)
+  const mangadexResults = await fetchFromMangaDex(query, 3500);
+  return mangadexResults;
 }
