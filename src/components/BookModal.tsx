@@ -174,7 +174,11 @@ export default function BookModal({
     setMediaType('manga');
     setUnitType('chapters');
     if (result.genre) setGenre(result.genre);
-    if (result.totalChapters) setTotalPages(result.totalChapters);
+    if (result.totalChapters && result.totalChapters > 0) {
+      setTotalPages(result.totalChapters);
+    } else {
+      setTotalPages(100);
+    }
     if (result.coverUrl) setCoverUrl(result.coverUrl);
     if (result.synopsis && !notes) setNotes(result.synopsis.slice(0, 300) + '...');
     if (result.score) {
@@ -406,7 +410,7 @@ export default function BookModal({
                               )}
                             </div>
                             <p className="text-[11px] text-zinc-500 truncate">
-                              {res.author} &bull; {res.totalChapters} caps &bull; {res.genre}
+                              {res.author} &bull; {res.totalChapters} caps {res.status === 'Publishing' || res.status === 'RELEASING' || res.status === 'ongoing' ? '(Em lançamento)' : ''} &bull; {res.genre}
                             </p>
                           </div>
                         </div>
